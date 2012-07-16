@@ -1,0 +1,56 @@
+// ComChat.idl : IDL source for ComChat
+//
+
+// This file will be processed by the MIDL tool to
+// produce the type library (ComChat.tlb) and marshalling code.
+
+import "oaidl.idl";
+import "ocidl.idl";
+
+
+[
+	object,
+	uuid(86BC549D-65A1-465C-9D36-4A5884757DC1),
+	pointer_default(unique)
+]
+interface IChatClient : IUnknown {
+	[] HRESULT notifyUserJoin([in] BSTR name);
+	[] HRESULT notifyUserLeave([in] BSTR name);
+};
+
+[
+	object,
+	uuid(F0A1DEEE-57D5-49DB-94F3-1BC126CB0B90),
+	pointer_default(unique)
+]
+interface IChatServerPort : IUnknown {
+};
+
+
+
+[
+	object,
+	uuid(DBAFF0AF-038D-4924-A4DA-EF086EF356F3),
+	pointer_default(unique)
+]
+interface IChatServer : IUnknown {
+	[] HRESULT registerClient([in] BSTR name, [in] IChatClient* pClient, [out,retval] IChatServerPort** ppPort);
+};
+
+
+[
+	uuid(6963B0F4-35B0-424E-B40F-97011A6C8037),
+	version(1.0),
+]
+library ComChatLib
+{
+	importlib("stdole2.tlb");
+	[
+		uuid(180E422C-16E4-421C-BC12-0673D7B602A9)		
+	]
+	coclass ChatServer
+	{
+		[default] interface IChatServer;
+	};
+};
+

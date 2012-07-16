@@ -1,0 +1,15 @@
+HKCR
+{
+	NoRemove CLSID
+	{
+		ForceRemove {758D4C51-F6A6-49B4-91F7-00C38DDD9906} = s 'ChatServerPort Class'
+		{
+			LocalServer32 = s '%MODULE%'
+			{
+				val ServerExecutable = s '%MODULE_RAW%'
+			}
+			TypeLib = s '{6963B0F4-35B0-424E-B40F-97011A6C8037}'
+			Version = s '1.0'
+		}
+	}
+}
