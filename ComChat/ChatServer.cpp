@@ -73,6 +73,22 @@ STDMETHODIMP CChatServer::registerClient(
 
 		// Register the login
 		m_clients.SetAt(name, cl);
+
+		// scan the message log and send appropriate messages
+		// to newly connected client
+		for(POSITION pos = m_log.GetHeadPosition(); pos; ) {
+			const LogItem&	item = m_log.GetNext(pos);
+
+			if(item.dst != _T("") &&
+				item.src != name &&
+				item.dst != name)
+			{
+				continue;
+			}
+
+			m_worker.QueueRequest(new MessageNotify(cl,
+				item.src, item.dst, item.msg));
+		}
 	}
 
 	// Return the port
@@ -126,8 +142,26 @@ HRESULT CChatServer::onSendMessage(BSTR name, BSTR dest, BSTR msg) {
 			m_worker.QueueRequest(new MessageNotify(pCl, name, dest, msg));
 		}
 	}else{
-		// announce only the author and the recipient
+		// announce to author and recipient only
+		ClientPtr		cla, clb;
+
+		if(!m_clients.Lookup(name, cla)) {
+			return E_UNEXPECTED;
+		}
+
+		if(!m_clients.Lookup(dest, clb)) {
+			return E_UNEXPECTED;
+		}
+
+		// announce to both parties
+		m_worker.QueueRequest(new MessageNotify(cla, name, dest, msg));
+		m_worker.QueueRequest(new MessageNotify(clb, name, dest, msg));
 	}
+
+	// register the messege in the message log
+	LogItem		item = { name, dest, msg };
+
+	m_log.AddTail(item);
 
 	return S_OK;
 }

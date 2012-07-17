@@ -67,11 +67,19 @@ public:
 	STDMETHOD(registerClient)(BSTR name, IChatClient* pClient, IChatServerPort** ppPort);
 
 private:
+	struct LogItem {
+		// TODO: switch those to _bstr_t to optimize everything
+		CComBSTR		src;
+		CComBSTR		dst;
+		CComBSTR		msg;
+	};
 
 	typedef CComPtr<IChatClient>	ClientPtr;
 
+	// leave CComBSTR here, because CAtlMap knows how to hash it
 	CAtlMap<CComBSTR, ClientPtr>	m_clients;
 
+	CAtlList<LogItem>				m_log;
 
 	CThreadPool<Worker>				m_worker;
 
