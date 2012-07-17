@@ -89,6 +89,7 @@ void CChatServer::onUnregister(BSTR name) {
 
 	// Effectively release IChatClient
 	if(!m_clients.RemoveKey(name)) {
+		ATLASSERT(false && "Attempt to remove an unknown login");
 		return;
 	}
 
@@ -105,6 +106,28 @@ void CChatServer::onUnregister(BSTR name) {
 			m_worker.QueueRequest(new LeaveNotify(pCl, name));
 		}
 	}
-		
+}
 
+
+HRESULT CChatServer::onSendMessage(BSTR name, BSTR dest, BSTR msg) {
+	// Lock self
+	ATL_LOCKER(CChatServer);
+
+	//err(_T("onSendMessage: %s"), BSTR2TSTR(msg));
+
+	if(dest == NULL) {
+		// announce to everybody
+		CComBSTR	n2;
+		ClientPtr	pCl;
+
+		for(POSITION pos = m_clients.GetStartPosition(); pos != NULL; ) {
+			m_clients.GetNextAssoc(pos, n2, pCl);
+
+			m_worker.QueueRequest(new MessageNotify(pCl, name, dest, msg));
+		}
+	}else{
+		// announce only the author and the recipient
+	}
+
+	return S_OK;
 }

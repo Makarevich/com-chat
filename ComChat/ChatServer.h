@@ -11,10 +11,10 @@
 
 using namespace ATL;
 
+
 #include "utils.h"
 
 #include "WorkerPool.h"
-
 
 
 // CChatServer
@@ -60,12 +60,14 @@ END_COM_MAP()
 	}
 
 public:
-
 	void onUnregister(BSTR name);
+
+	HRESULT onSendMessage(BSTR name, BSTR dest, BSTR msg);
 
 	STDMETHOD(registerClient)(BSTR name, IChatClient* pClient, IChatServerPort** ppPort);
 
 private:
+
 	typedef CComPtr<IChatClient>	ClientPtr;
 
 	CAtlMap<CComBSTR, ClientPtr>	m_clients;

@@ -101,7 +101,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*
 	//
 
 	{
-		CMainDlg	dlgMain(*pIc);
+		CMainDlg	dlgMain(*pIc, pIsp);
 
 		dlgMain.DoModal();
 	}
@@ -124,35 +124,16 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*
 //
 
 STDMETHODIMP CChatClient::notifyUserJoin (BSTR name){
-	for(;;){
-		if(m_dialog != NULL) {
-			m_dialog->notifyUserJoin(name);
-			return S_OK;
-		}
-
-		ATL_LOCKER(CChatClient);
-
-		if(m_dialog == NULL) {
-			m_pending.AddTail(new JoinNotify(this, name));
-			return S_OK;
-		}
-	}
+	return dialogNotify<BSTR, &CMainDlg::notifyUserJoin, JoinNotify>(name);
 }
 
 STDMETHODIMP CChatClient::notifyUserLeave (BSTR name){
-	for(;;){
-		if(m_dialog != NULL) {
-			m_dialog->notifyUserLeave(name);
-			return S_OK;
-		}
+	return dialogNotify<BSTR, &CMainDlg::notifyUserLeave, LeaveNotify>(name);
+}
 
-		ATL_LOCKER(CChatClient);
-
-		if(m_dialog == NULL) {
-			m_pending.AddTail(new LeaveNotify(this, name));
-			return S_OK;
-		}
-	}
+STDMETHODIMP CChatClient::notifyMessage (ChatMessage* msg) {
+	//err(_T("Message recved: %s"), BSTR2TSTR(msg->msg));
+	return dialogNotify<ChatMessage*, &CMainDlg::notifyMessage, MessageNotify>(msg);
 }
 
 CChatClient*		CChatClient::m_instance = NULL;

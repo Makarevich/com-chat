@@ -51,7 +51,9 @@ END_COM_MAP()
 
 public:
 
-	// STDMETHOD(registerClient)(BSTR name, IChatClient* pClient, IChatServerPort** ppPort);
+	STDMETHOD(sendMessage)(BSTR dest, BSTR msg) {
+		return m_serv->onSendMessage(m_login, dest, msg);
+	}
 
 private:
 	CComBSTR				m_login;

@@ -108,6 +108,25 @@ public:
 
 	STDMETHOD(notifyUserJoin) (BSTR name);
 	STDMETHOD(notifyUserLeave)(BSTR name);
+	STDMETHOD(notifyMessage)  (ChatMessage* msg);
+
+private:
+	template<class T, void (CMainDlg::*method)(T), class N>
+	HRESULT dialogNotify(T item) {
+		for(;;){
+			if(m_dialog != NULL) {
+				(m_dialog->*method)(item);
+				return S_OK;
+			}
+
+			ATL_LOCKER(CChatClient);
+
+			if(m_dialog == NULL) {
+				m_pending.AddTail(new N(this, item));
+				return S_OK;
+			}
+		}
+	}
 
 private:
 	static CChatClient*		m_instance;

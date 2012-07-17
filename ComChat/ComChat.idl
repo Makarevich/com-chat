@@ -7,23 +7,33 @@
 import "oaidl.idl";
 import "ocidl.idl";
 
+typedef struct {
+	[ref]		BSTR	src;
+	[unique]	BSTR	dst;		// may be NULL in case of a broadcast
+	[ref]		BSTR	msg;
+} ChatMessage;
 
 [
 	object,
 	uuid(86BC549D-65A1-465C-9D36-4A5884757DC1),
-	pointer_default(unique)
+	pointer_default(ref)
 ]
 interface IChatClient : IUnknown {
-	[] HRESULT notifyUserJoin([in] BSTR name);
-	[] HRESULT notifyUserLeave([in] BSTR name);
+	HRESULT notifyUserJoin([in,ref] BSTR name);
+	HRESULT notifyUserLeave([in,ref] BSTR name);
+
+	HRESULT notifyMessage([in,ref] ChatMessage* msg);
 };
 
 [
 	object,
 	uuid(F0A1DEEE-57D5-49DB-94F3-1BC126CB0B90),
-	pointer_default(unique)
+	pointer_default(ref)
 ]
 interface IChatServerPort : IUnknown {
+	HRESULT sendMessage(
+		[in, unique]	BSTR dest,
+		[in, ref]		BSTR msg);
 };
 
 
@@ -31,10 +41,13 @@ interface IChatServerPort : IUnknown {
 [
 	object,
 	uuid(DBAFF0AF-038D-4924-A4DA-EF086EF356F3),
-	pointer_default(unique)
+	pointer_default(ref)
 ]
 interface IChatServer : IUnknown {
-	[] HRESULT registerClient([in] BSTR name, [in] IChatClient* pClient, [out,retval] IChatServerPort** ppPort);
+	HRESULT registerClient(
+		[in,ref] BSTR name,
+		[in] IChatClient* pClient,
+		[out,retval] IChatServerPort** ppPort);
 };
 
 

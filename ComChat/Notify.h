@@ -18,6 +18,11 @@ protected:
 		const CComBSTR&				name)
 		: pCl(pCl), name(name) {}
 public:
+
+	//
+	// NOTE: all notification object free themselves upon Invoke
+	//
+
 	virtual void Invoke() = 0;
 };
 
@@ -45,3 +50,35 @@ DEFINE_COMMAND_END()
 DEFINE_COMMAND_START(Leave)
 	pCl->notifyUserLeave(name);
 DEFINE_COMMAND_END()
+
+
+//
+// MessageNotify
+//
+
+class MessageNotify : public AbsNotify {
+private:
+	MessageNotify (const MessageNotify&);
+
+	CComBSTR				dest;
+	CComBSTR				msg;
+
+public:
+	MessageNotify(
+		const CComPtr<IChatClient>& pCl,
+		const CComBSTR&				name, 
+		const CComBSTR&				dest, 
+		const CComBSTR&				msg)
+		: AbsNotify(pCl, name), dest(dest), msg(msg) {}
+
+	MessageNotify(
+		const CComPtr<IChatClient>& pCl,
+		const ChatMessage* const	m)
+		: AbsNotify(pCl, m->src), dest(m->dst), msg(m->msg) {}
+
+	virtual void Invoke(){
+		ChatMessage		m = { name, dest, msg };
+
+		pCl->notifyMessage(&m);
+	}
+};

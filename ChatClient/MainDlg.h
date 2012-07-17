@@ -22,7 +22,9 @@ class CMainDlg :
 public:
 	enum { IDD = IDD_MAINDLG };
 
-	CMainDlg(CChatClient& client) : m_chat_client(client)
+	CMainDlg(CChatClient&				client,
+		const CComPtr<IChatServerPort>& pIsp)
+		: m_chat_client(client), m_server_port(pIsp)
 	{
 	}
 
@@ -80,7 +82,9 @@ public:
 
 		buf[cnt] = 0;
 
-		err(_T("Sending: %s"), buf);
+		// TODO: here a COM CALL is made by GUI thread, which is BAAAD
+		COCALL(m_server_port->sendMessage(NULL, CComBSTR(buf)), _T("sending message")) {
+		}
 
 		m_msg.SetWindowText(_T(""));
 		m_msg.SetFocus();
@@ -134,10 +138,25 @@ public:
 		m_log.AddString(s);
 	}
 
-private:
-	CListBox		m_log;
-	CEdit			m_msg;
-	CComboBox		m_peers;
+	void notifyMessage(ChatMessage* m) {
+		CString		s;
 
-	CChatClient&	m_chat_client;
+		if(m->dst) {
+			s = s + m->src + _T(" to ") + m->dst + _T(": ") + m->msg;
+		}else{
+			s = s + m->src + _T(": ") + m->msg;
+		}
+
+		m_log.AddString(s);
+	}
+
+private:
+	CListBox					m_log;
+	CEdit						m_msg;
+	CComboBox					m_peers;
+
+	CChatClient&				m_chat_client;
+
+	CComPtr<IChatServerPort>	m_server_port;
+
 };
