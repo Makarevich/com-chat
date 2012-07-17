@@ -9,7 +9,7 @@
 
 
 STDMETHODIMP CChatServer::registerClient(
-	BSTR				name,
+	BSTR				name_bstr,
 	IChatClient*		pClient,
 	IChatServerPort**	ppPort)
 {
@@ -17,6 +17,24 @@ STDMETHODIMP CChatServer::registerClient(
 
 	typedef CComObject<CChatServerPort>		Port;
 	Port		*pPort = NULL;
+
+	CComBSTR	name(name_bstr);	// allocate a copy
+
+	// check the login
+	{
+		const UINT	len = name.Length();
+
+		for(UINT i = 0; i < len; i++) {
+			const OLECHAR	c = name.m_str[i];
+
+			if(_T('A') <= c && c <= _T('Z')) continue;
+			if(_T('a') <= c && c <= _T('z')) continue;
+			if(_T('0') <= c && c <= _T('9')) continue;
+
+			return S_OK;	// deny the login
+		}
+	}
+
 
 	{
 		// Lock self
@@ -34,9 +52,7 @@ STDMETHODIMP CChatServer::registerClient(
 		// Create and setup a port object
 		HRESULT hr = Port::CreateInstance(&pPort);
 
-		if(FAILED(hr)) {
-			return hr;
-		}
+		if(FAILED(hr)) return hr;
 
 		pPort->Setup(name, this);
 
@@ -48,7 +64,10 @@ STDMETHODIMP CChatServer::registerClient(
 			for(POSITION pos = m_clients.GetStartPosition(); pos != NULL; ) {
 				m_clients.GetNextAssoc(pos, n2, pCl);
 
+				// mutual announce
 				m_worker.QueueRequest(new JoinNotify(pCl, name));
+
+				m_worker.QueueRequest(new JoinNotify(cl, n2));
 			}
 		}
 
@@ -69,7 +88,9 @@ void CChatServer::onUnregister(BSTR name) {
 	ATL_LOCKER(CChatServer);
 
 	// Effectively release IChatClient
-	m_clients.RemoveKey(name);
+	if(!m_clients.RemoveKey(name)) {
+		return;
+	}
 
 	// announce
 	{

@@ -76,15 +76,7 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*
 	}
 
 	//
-	// 4. Create main modal dialog
-	//
-
-	CMainDlg	dlgMain;
-
-	pIc->Configure(&dlgMain);
-
-	//
-	// 5. Attempt to login
+	// 4. Attempt to login
 	//
 
 	CComPtr<IChatServerPort>	pIsp;
@@ -105,10 +97,12 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*
 	}
 
 	//
-	// 6. Show main interface
+	// 5. Show main interface
 	//
 
 	{
+		CMainDlg	dlgMain(*pIc);
+
 		dlgMain.DoModal();
 	}
 
@@ -126,6 +120,41 @@ int WINAPI _tWinMain(HINSTANCE hInstance, HINSTANCE /*hPrevInstance*/, LPTSTR /*
 
 
 //////////////////////////////////////////////
+// class CChatClient
+//
+
+STDMETHODIMP CChatClient::notifyUserJoin (BSTR name){
+	for(;;){
+		if(m_dialog != NULL) {
+			m_dialog->notifyUserJoin(name);
+			return S_OK;
+		}
+
+		ATL_LOCKER(CChatClient);
+
+		if(m_dialog == NULL) {
+			m_pending.AddTail(new JoinNotify(this, name));
+			return S_OK;
+		}
+	}
+}
+
+STDMETHODIMP CChatClient::notifyUserLeave (BSTR name){
+	for(;;){
+		if(m_dialog != NULL) {
+			m_dialog->notifyUserLeave(name);
+			return S_OK;
+		}
+
+		ATL_LOCKER(CChatClient);
+
+		if(m_dialog == NULL) {
+			m_pending.AddTail(new LeaveNotify(this, name));
+			return S_OK;
+		}
+	}
+}
 
 CChatClient*		CChatClient::m_instance = NULL;
 HANDLE				CChatClient::m_release_event = NULL;
+

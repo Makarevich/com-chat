@@ -33,7 +33,7 @@ END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
-	void Setup(BSTR login, CChatServer* serv) {
+	void Setup(const CComBSTR& login, CChatServer* serv) {
 		m_login = login;
 		m_serv = serv;
 	}

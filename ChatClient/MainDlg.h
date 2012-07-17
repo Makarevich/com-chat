@@ -5,7 +5,13 @@
 #pragma once
 
 
+class CMainDlg;
+
 #include "utils.h"
+
+
+
+#include "ChatClient.h"
 
 
 
@@ -15,6 +21,10 @@ class CMainDlg :
 {
 public:
 	enum { IDD = IDD_MAINDLG };
+
+	CMainDlg(CChatClient& client) : m_chat_client(client)
+	{
+	}
 
 	BEGIN_MSG_MAP(CMainDlg)
 		MESSAGE_HANDLER(WM_INITDIALOG, OnInitDialog)
@@ -30,6 +40,7 @@ public:
 	BEGIN_DDX_MAP(CMainDlg)
 		DDX_CONTROL_HANDLE(IDC_MESSAGE, m_msg)
 		DDX_CONTROL_HANDLE(IDC_LOG,     m_log)
+		DDX_CONTROL_HANDLE(IDC_PEERS,   m_peers)
 	END_DDX_MAP()
 
 
@@ -46,7 +57,13 @@ public:
 		HICON hIconSmall = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON));
 		SetIcon(hIconSmall, FALSE);
 
+		// minor stuff
 		m_msg.SetFocus();
+
+		m_peers.AddString(_T("--"));
+
+		// tell the client object we're ready
+		m_chat_client.Configure(this);
 
 		return TRUE;
 	}
@@ -74,6 +91,9 @@ public:
 
 	LRESULT OnClose(UINT /*uMsg*/, WPARAM /*wParam*/, LPARAM /*lParam*/, BOOL& /*bHandled*/)
 	{
+		// tell the client object that we're done
+		m_chat_client.Configure(NULL);
+
 		EndDialog(0);
 		return 0;
 	}
@@ -88,6 +108,10 @@ public:
 	//
 
 	void notifyUserJoin(BSTR name) {
+		m_peers.AddString(name);
+
+		/////
+
 		CString		s;
 
 		s = s + _T("User \"") + name + _T("\" joined");
@@ -96,6 +120,13 @@ public:
 	}
 
 	void notifyUserLeave(BSTR name) {
+		const int ind = m_peers.FindString(0, name);
+
+		if(ind != 0 && ind != CB_ERR) {
+			m_peers.DeleteString(ind);
+		}
+
+		/////
 		CString		s;
 
 		s = s + _T("User \"") + name + _T("\" left");
@@ -106,4 +137,7 @@ public:
 private:
 	CListBox		m_log;
 	CEdit			m_msg;
+	CComboBox		m_peers;
+
+	CChatClient&	m_chat_client;
 };

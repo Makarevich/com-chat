@@ -1,13 +1,41 @@
 #pragma once
 
 
-//
-// COCALL
-//
 
 #include "stdafx.h"
 
 #include <atlstr.h>		// strangely, this should be outside the PCH
+
+
+
+//
+// Locker
+//
+//		Simple utility that wraps calls to Lock/Unlock into an object
+
+
+template<class T>
+class Locker {
+private:
+	T*	obj;
+public:
+
+	Locker(T* obj) : obj(obj) {
+		obj->Lock();
+	}
+
+	~Locker() {
+		obj->Unlock();
+	}
+};
+
+
+#define ATL_LOCKER(cl)		Locker<cl>	_ ## cl ## __locker(this)
+
+
+//
+// COCALL
+//
 
 
 #include "../ComChat/ComChat_i.h"

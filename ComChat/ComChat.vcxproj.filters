@@ -60,6 +60,9 @@
     <ClInclude Include="WorkerPool.h">
       <Filter>Header Files</Filter>
     </ClInclude>
+    <ClInclude Include="Notify.h">
+      <Filter>Header Files</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="ComChat.rc">
