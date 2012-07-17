@@ -80,5 +80,7 @@ public:
 		ChatMessage		m = { name, dest, msg };
 
 		pCl->notifyMessage(&m);
+
+		delete this;
 	}
 };
