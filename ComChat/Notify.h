@@ -64,21 +64,24 @@ private:
 	CComBSTR				dest;
 	CComBSTR				msg;
 
+	FILETIME				time;
+
 public:
 	MessageNotify(
 		const CComPtr<IChatClient>& pCl,
 		const CComBSTR&				name, 
 		const CComBSTR&				dest, 
-		const CComBSTR&				msg)
-		: AbsNotify(pCl, name), dest(dest), msg(msg) {}
+		const CComBSTR&				msg,
+		const FILETIME&				time)
+		: AbsNotify(pCl, name), dest(dest), msg(msg), time(time) {}
 
 	MessageNotify(
 		const CComPtr<IChatClient>& pCl,
 		const ChatMessage* const	m)
-		: AbsNotify(pCl, m->src), dest(m->dst), msg(m->msg) {}
+		: AbsNotify(pCl, m->src), dest(m->dst), msg(m->msg), time(m->time) {}
 
 	virtual void Invoke(){
-		ChatMessage		m = { name, dest, msg };
+		ChatMessage		m = { name, dest, msg, time };
 
 		pCl->notifyMessage(&m);
 

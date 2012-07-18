@@ -12,9 +12,11 @@ import "ocidl.idl";
 //
 
 typedef struct {
-	[ref]		BSTR	src;
-	[unique]	BSTR	dst;		// may be NULL in case of a broadcast
-	[ref]		BSTR	msg;
+	[ref]		BSTR		src;
+	[unique]	BSTR		dst;		// may be NULL in case of a broadcast
+	[ref]		BSTR		msg;
+
+				FILETIME	time;		// message timestamp
 } ChatMessage;
 
 //

@@ -4,6 +4,8 @@
 #include "ChatServer.h"
 #include "ChatServerPort.h"
 
+#include <time.h>
+
 //
 // IChatServer implementation
 //
@@ -91,7 +93,7 @@ STDMETHODIMP CChatServer::registerClient(
 			}
 
 			m_worker.QueueRequest(new MessageNotify(cl,
-				item.src, item.dst, item.msg));
+				item.src, item.dst, item.msg, item.time));
 		}
 	}
 
@@ -130,6 +132,17 @@ void CChatServer::onUnregister(BSTR name) {
 
 
 HRESULT CChatServer::onSendMessage(BSTR name, BSTR dest, BSTR msg) {
+
+	FILETIME	t;
+
+	// determine current timestamp
+	{
+		SYSTEMTIME		st;
+
+		GetLocalTime(&st);
+		SystemTimeToFileTime(&st, &t);
+	}
+
 	// Lock self
 	ATL_LOCKER(CChatServer);
 
@@ -143,7 +156,7 @@ HRESULT CChatServer::onSendMessage(BSTR name, BSTR dest, BSTR msg) {
 		for(POSITION pos = m_clients.GetStartPosition(); pos != NULL; ) {
 			m_clients.GetNextAssoc(pos, n2, pCl);
 
-			m_worker.QueueRequest(new MessageNotify(pCl, name, dest, msg));
+			m_worker.QueueRequest(new MessageNotify(pCl, name, dest, msg, t));
 		}
 	}else{
 		// announce to author and recipient only
@@ -158,12 +171,12 @@ HRESULT CChatServer::onSendMessage(BSTR name, BSTR dest, BSTR msg) {
 		}
 
 		// announce to both parties
-		m_worker.QueueRequest(new MessageNotify(cla, name, dest, msg));
-		m_worker.QueueRequest(new MessageNotify(clb, name, dest, msg));
+		m_worker.QueueRequest(new MessageNotify(cla, name, dest, msg, t));
+		m_worker.QueueRequest(new MessageNotify(clb, name, dest, msg, t));
 	}
 
 	// register the messege in the message log
-	LogItem		item = { name, dest, msg };
+	LogItem		item = { name, dest, msg, t };
 
 	m_log.AddTail(item);
 

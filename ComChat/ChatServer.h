@@ -82,6 +82,8 @@ private:
 		CComBSTR		src;
 		CComBSTR		dst;
 		CComBSTR		msg;
+
+		FILETIME		time;
 	};
 
 	typedef CComPtr<IChatClient>	ClientPtr;

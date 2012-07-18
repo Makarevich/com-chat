@@ -154,13 +154,17 @@ public:
 	}
 
 	void notifyMessage(ChatMessage* m) {
+		SYSTEMTIME	st;
+
+		FileTimeToSystemTime(&m->time, &st);
+
 		CString		s;
 
-		if(m->dst) {
-			s = s + m->src + _T(" to ") + m->dst + _T(": ") + m->msg;
-		}else{
-			s = s + m->src + _T(": ") + m->msg;
-		}
+		s.Format(_T("%i:%i:%i %s%s: %s"),
+			st.wHour, st.wMinute, st.wSecond,
+			m->src,
+			(m->dst ? CString(" to ") + m->dst : CString()),
+			m->msg);
 
 		m_log.AddString(s);
 	}
