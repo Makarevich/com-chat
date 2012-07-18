@@ -77,13 +77,53 @@ public:
 
 	MessageNotify(
 		const CComPtr<IChatClient>& pCl,
-		const ChatMessage* const	m)
-		: AbsNotify(pCl, m->src), dest(m->dst), msg(m->msg), time(m->time) {}
+		const ChatMessage&			m)
+		: AbsNotify(pCl, m.src), dest(m.dst), msg(m.msg), time(m.time) {}
 
 	virtual void Invoke(){
 		ChatMessage		m = { name, dest, msg, time };
 
-		pCl->notifyMessage(&m);
+		pCl->notifyMessage(m);
+
+		delete this;
+	}
+};
+
+//
+// InitializeNotify
+//
+
+class InitializeNotify : public AbsNotify {
+private:
+	InitializeNotify (const MessageNotify&);
+
+	CAtlArray<CComBSTR>		init_names;
+	CAtlArray<ChatMessage>	init_msgs;
+
+public:
+	InitializeNotify(
+		const CComPtr<IChatClient>&		pCl,
+		const CAtlArray<CComBSTR>&		names,
+		const CAtlArray<ChatMessage>&	msgs)
+		: AbsNotify(pCl, NULL), init_names(), init_msgs()
+	{
+		init_names.Copy(names);
+		init_msgs .Copy(msgs);
+	}
+
+	virtual void Invoke(){
+		// convert names from CComBSTR to BSTR
+		CAtlArray<BSTR>	bn;
+
+		bn.SetCount(init_names.GetCount());
+
+		for(int i = init_names.GetCount() - 1; i >= 0; i--) {
+			bn[i] = init_names[i];
+		}
+
+		pCl->initialize(
+			bn.GetData(), bn.GetCount(),
+			init_msgs.GetData(), init_msgs.GetCount());
 
 		delete this;
 	}

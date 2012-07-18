@@ -31,7 +31,14 @@ interface IChatClient : IUnknown {
 	HRESULT notifyUserJoin([in,ref] BSTR name);
 	HRESULT notifyUserLeave([in,ref] BSTR name);
 
-	HRESULT notifyMessage([in,ref] ChatMessage* msg);
+	HRESULT notifyMessage([in] ChatMessage msg);
+
+	HRESULT initialize(
+		[in, size_is(name_count)]		BSTR names[],
+		[in]							int	name_count,
+		[in, size_is(msg_count)]		ChatMessage msgs[],
+		[in]							int msg_count);
+
 };
 
 //

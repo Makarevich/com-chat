@@ -88,6 +88,11 @@ public:
 			*buf = 0;
 			int cnt = m_msg.GetLine(0, buf, buf_size);
 			buf[cnt] = 0;
+
+			// do nothing for empty messages
+			if(cnt == 0) {
+				return 0;
+			}
 		}
 
 		{
@@ -153,18 +158,18 @@ public:
 		m_log.AddString(s);
 	}
 
-	void notifyMessage(ChatMessage* m) {
+	void notifyMessage(ChatMessage m) {
 		SYSTEMTIME	st;
 
-		FileTimeToSystemTime(&m->time, &st);
+		FileTimeToSystemTime(&m.time, &st);
 
 		CString		s;
 
 		s.Format(_T("%i:%i:%i %s%s: %s"),
 			st.wHour, st.wMinute, st.wSecond,
-			m->src,
-			(m->dst ? CString(" to ") + m->dst : CString()),
-			m->msg);
+			m.src,
+			(m.dst ? CString(" to ") + m.dst : CString()),
+			m.msg);
 
 		m_log.AddString(s);
 	}

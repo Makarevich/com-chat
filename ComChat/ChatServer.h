@@ -84,6 +84,11 @@ private:
 		CComBSTR		msg;
 
 		FILETIME		time;
+
+		operator ChatMessage () const {
+			ChatMessage		m = { src, dst, msg, time };
+			return m;
+		}
 	};
 
 	typedef CComPtr<IChatClient>	ClientPtr;

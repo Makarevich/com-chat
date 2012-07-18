@@ -130,7 +130,29 @@ public:
 
 	STDMETHOD(notifyUserJoin) (BSTR name);
 	STDMETHOD(notifyUserLeave)(BSTR name);
-	STDMETHOD(notifyMessage)  (ChatMessage* msg);
+	STDMETHOD(notifyMessage)  (ChatMessage msg);
+
+
+	STDMETHOD(initialize)(
+		BSTR names[], int name_count,
+		ChatMessage msgs[], int msg_count)
+	{
+		// Interpert initialization request as a series of userjoin and message notifications.
+
+		HRESULT	hr;
+
+		for(int i = 0; i < name_count; i++) {
+			hr = notifyUserJoin(names[i]);
+			if(FAILED(hr)) return hr;
+		}
+
+		for(int i = 0; i < msg_count; i++) {
+			hr = notifyMessage(msgs[i]);
+			if(FAILED(hr)) return hr;
+		}
+
+		return S_OK;
+	}
 
 private:
 

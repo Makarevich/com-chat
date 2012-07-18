@@ -140,9 +140,9 @@ STDMETHODIMP CChatClient::notifyUserLeave (BSTR name){
 	return dialogNotify<BSTR, &CMainDlg::notifyUserLeave, LeaveNotify>(name);
 }
 
-STDMETHODIMP CChatClient::notifyMessage (ChatMessage* msg) {
+STDMETHODIMP CChatClient::notifyMessage (ChatMessage msg) {
 	//err(_T("Message recved: %s"), BSTR2TSTR(msg->msg));
-	return dialogNotify<ChatMessage*, &CMainDlg::notifyMessage, MessageNotify>(msg);
+	return dialogNotify<ChatMessage, &CMainDlg::notifyMessage, MessageNotify>(msg);
 }
 
 //

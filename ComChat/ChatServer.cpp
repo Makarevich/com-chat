@@ -42,12 +42,15 @@ STDMETHODIMP CChatServer::registerClient(
 		}
 	}
 
+	CAtlArray<CComBSTR>		init_names;
+	CAtlArray<ChatMessage>	init_msgs;
+
+	ClientPtr		cl(pClient);
 
 	{
 		// Lock self
 		ATL_LOCKER(CChatServer);
 
-		ClientPtr		cl(pClient);
 		ClientPtr		cl2;
 
 		// Check if the login has already been registered.
@@ -62,7 +65,8 @@ STDMETHODIMP CChatServer::registerClient(
 
 		pPort->Setup(name, this);
 
-		// announce the registration
+		// announce the registration to other clients,
+		// as well as collect other login
 		{
 			CComBSTR	n2;
 			ClientPtr	pCl;
@@ -73,15 +77,16 @@ STDMETHODIMP CChatServer::registerClient(
 				// mutual announce
 				m_worker.QueueRequest(new JoinNotify(pCl, name));
 
-				m_worker.QueueRequest(new JoinNotify(cl, n2));
+				//m_worker.QueueRequest(new JoinNotify(cl, n2));
+				init_names.Add(n2);
 			}
 		}
 
 		// Register the login
 		m_clients.SetAt(name, cl);
 
-		// scan the message log and send appropriate messages
-		// to newly connected client
+		// scan the message log and collect appropriate messages
+		// for newly connected client
 		for(POSITION pos = m_log.GetHeadPosition(); pos; ) {
 			const LogItem&	item = m_log.GetNext(pos);
 
@@ -92,10 +97,15 @@ STDMETHODIMP CChatServer::registerClient(
 				continue;
 			}
 
-			m_worker.QueueRequest(new MessageNotify(cl,
-				item.src, item.dst, item.msg, item.time));
+			//m_worker.QueueRequest(new MessageNotify(cl,
+			//	item.src, item.dst, item.msg, item.time));
+
+			init_msgs.Add(item);
 		}
 	}
+
+	// Send the initialization message
+	m_worker.QueueRequest(new InitializeNotify(cl, init_names, init_msgs));
 
 	// Return the port object
 	pPort->AddRef();
