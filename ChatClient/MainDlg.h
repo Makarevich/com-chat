@@ -140,7 +140,7 @@ public:
 
 		s = s + _T("User \"") + name + _T("\" joined");
 
-		m_log.AddString(s);
+		add_log_message(s);
 	}
 
 	void notifyUserLeave(BSTR name) {
@@ -155,7 +155,7 @@ public:
 
 		s = s + _T("User \"") + name + _T("\" left");
 
-		m_log.AddString(s);
+		add_log_message(s);
 	}
 
 	void notifyMessage(ChatMessage m) {
@@ -165,16 +165,40 @@ public:
 
 		CString		s;
 
-		s.Format(_T("%i:%i:%i %s%s: %s"),
+		s.Format(_T("%02i:%02i:%02i %s%s: %s"),
 			st.wHour, st.wMinute, st.wSecond,
 			m.src,
 			(m.dst ? CString(" to ") + m.dst : CString()),
 			m.msg);
 
-		m_log.AddString(s);
+		add_log_message(s);
 	}
 
 private:
+	void add_log_message(const CString& s) {
+#if 0
+		// TODO: lock self???
+
+		// fetch scroll info of the message log
+		SCROLLINFO	si = { sizeof(SCROLLINFO), SIF_POS | SIF_RANGE };
+		const BOOL	si_ok = m_log.GetScrollInfo(SB_VERT, &si);
+
+		//err(_T("%u < %u"), si.nPos, si.nMax);
+
+		// add new string
+		const int index = m_log.AddString(s);
+
+		// scroll the log, if necessary
+		if(si_ok /* && si.nPos == si.nMax */ ) {
+			//const int h = m_log.GetItemHeight(index);
+			//m_log.ScrollWindow(0, h);
+			m_log.SetScrollPos(SB_VERT, si.nPos + 1);
+		}
+#else
+		m_log.AddString(s);
+#endif
+	}
+
 	// dialog widgets
 	CListBox					m_log;
 	CEdit						m_msg;
