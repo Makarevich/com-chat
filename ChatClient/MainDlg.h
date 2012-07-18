@@ -189,13 +189,14 @@ private:
 		const int index = m_log.AddString(s);
 
 		// scroll the log, if necessary
-		if(si_ok /* && si.nPos == si.nMax */ ) {
+		if(si_ok && si.nPos == si.nMax ) {
 			//const int h = m_log.GetItemHeight(index);
 			//m_log.ScrollWindow(0, h);
-			m_log.SetScrollPos(SB_VERT, si.nPos + 1);
+			//m_log.SetScrollPos(SB_VERT, si.nPos + 1);
+			m_log.SetTopIndex(index);
 		}
 #else
-		m_log.AddString(s);
+		m_log.SetTopIndex(m_log.AddString(s));
 #endif
 	}
 
