@@ -12,6 +12,7 @@
 // Locker
 //
 //		Simple utility that wraps calls to Lock/Unlock into an object
+//
 
 
 template<class T>
@@ -41,7 +42,7 @@ public:
 #include "../ComChat/ComChat_i.h"
 
 #define COCALL(c, msg)			\
-	if(CoCallImplementation((c), L"Error while " msg))
+	if(CoCallImplementation((c), _T("Error while ") msg))
 
 extern bool CoCallImplementation(HRESULT, LPCTSTR);
 

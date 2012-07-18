@@ -13,7 +13,9 @@ class CMainDlg;
 
 #include "ChatClient.h"
 
-
+//
+// CMainDlg - the main dialog
+//
 
 class CMainDlg :
 	public CDialogImpl<CMainDlg>,
@@ -21,6 +23,8 @@ class CMainDlg :
 {
 public:
 	enum { IDD = IDD_MAINDLG };
+
+	// The main dialog is configured with the client object and a server port.
 
 	CMainDlg(CChatClient&				client,
 		const CComPtr<IChatServerPort>& pIsp)
@@ -59,10 +63,10 @@ public:
 		HICON hIconSmall = AtlLoadIconImage(IDR_MAINFRAME, LR_DEFAULTCOLOR, ::GetSystemMetrics(SM_CXSMICON), ::GetSystemMetrics(SM_CYSMICON));
 		SetIcon(hIconSmall, FALSE);
 
-		// minor stuff
+		// minor GUI stuff
 		m_msg.SetFocus();
 
-		m_peers.AddString(_T("--"));
+		m_peers.AddString(_T("--"));	// That line would indicate "send to all"
 
 		// tell the client object we're ready
 		m_chat_client.Configure(this);
@@ -82,14 +86,13 @@ public:
 
 		buf[cnt] = 0;
 
-		// TODO: here a COM CALL is made by GUI thread, which is BAAAD
+		// TODO: here a COM CALL is made by the GUI thread, which is BAAAD
 		COCALL(m_server_port->sendMessage(NULL, CComBSTR(buf)), _T("sending message")) {
 		}
 
 		m_msg.SetWindowText(_T(""));
 		m_msg.SetFocus();
 
-		//EndDialog(wID);
 		return 0;
 	}
 
@@ -106,9 +109,8 @@ public:
 
 	//
 	// NOTE:
-	//	The following methods are called asynchronously
-	//	by the free-threaded client object. Implicit
-	//	serialization is performed via dialog's message loop.
+	//	The following methods are called asynchronously by the free-threaded
+	//  client object. Implicit synchronization is done via dialog's message loop.
 	//
 
 	void notifyUserJoin(BSTR name) {
@@ -151,12 +153,14 @@ public:
 	}
 
 private:
+	// dialog widgets
 	CListBox					m_log;
 	CEdit						m_msg;
 	CComboBox					m_peers;
 
-	CChatClient&				m_chat_client;
+	CChatClient&				m_chat_client;		// used for the client object configuration
 
+	// server port pointer
 	CComPtr<IChatServerPort>	m_server_port;
 
 };

@@ -6,7 +6,9 @@
 #include "ComChat_i.h"
 
 
-
+//
+// Nothing unusual here
+//
 
 class CComChatModule : public ATL::CAtlExeModuleT< CComChatModule >
 	{

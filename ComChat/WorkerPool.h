@@ -25,6 +25,8 @@ public:
 		void* pvWorkerParam,
 		OVERLAPPED* pOverlapped
 	){
+		// No need to free the request object, since a call to AbsNotify::Invoke
+		// releases the request object.
 		request->Invoke();
 	}
 };

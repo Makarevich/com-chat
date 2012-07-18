@@ -4,29 +4,34 @@
 #include "ChatServer.h"
 #include "ChatServerPort.h"
 
-
-// CChatServer
-
+//
+// IChatServer implementation
+//
 
 STDMETHODIMP CChatServer::registerClient(
 	BSTR				name_bstr,
 	IChatClient*		pClient,
 	IChatServerPort**	ppPort)
 {
+	typedef CComObject<CChatServerPort>		Port;
+
+
 	*ppPort = NULL;
 
-	typedef CComObject<CChatServerPort>		Port;
-	Port		*pPort = NULL;
+	Port	*pPort = NULL;
 
-	CComBSTR	name(name_bstr);	// allocate a copy
+	CComBSTR	name(name_bstr);	// allocate a copy of the client's login
 
-	// check the login
+	// check the login for some sort of sanity
 	{
 		const UINT	len = name.Length();
+
+		if(len == 0) return S_OK;
 
 		for(UINT i = 0; i < len; i++) {
 			const OLECHAR	c = name.m_str[i];
 
+			// allow the following char ranges
 			if(_T('A') <= c && c <= _T('Z')) continue;
 			if(_T('a') <= c && c <= _T('z')) continue;
 			if(_T('0') <= c && c <= _T('9')) continue;
@@ -45,11 +50,10 @@ STDMETHODIMP CChatServer::registerClient(
 
 		// Check if the login has already been registered.
 		if(m_clients.Lookup(name, cl2)) {
-			//err(L"%s already reggd", BSTR2TSTR(name));
 			return S_OK;
 		}
 
-		// Create and setup a port object
+		// Create and setup a server port object
 		HRESULT hr = Port::CreateInstance(&pPort);
 
 		if(FAILED(hr)) return hr;
@@ -91,7 +95,7 @@ STDMETHODIMP CChatServer::registerClient(
 		}
 	}
 
-	// Return the port
+	// Return the port object
 	pPort->AddRef();
 	*ppPort = pPort;
 
@@ -109,7 +113,7 @@ void CChatServer::onUnregister(BSTR name) {
 		return;
 	}
 
-	// announce
+	// announce the unregistration
 	{
 		CComBSTR	n2;
 		ClientPtr	pCl;

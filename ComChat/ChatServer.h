@@ -16,8 +16,9 @@ using namespace ATL;
 
 #include "WorkerPool.h"
 
-
+//
 // CChatServer
+//
 
 class ATL_NO_VTABLE CChatServer :
 	public CComObjectRootEx<CComMultiThreadModel>,
@@ -46,6 +47,7 @@ END_COM_MAP()
 
 	HRESULT FinalConstruct()
 	{
+		// Initialize the thread pool
 		HRESULT hr = m_worker.Initialize();
 
 		if(FAILED(hr)) return hr;
@@ -55,18 +57,26 @@ END_COM_MAP()
 
 	void FinalRelease()
 	{
-		//err(L"Server dying");
+		// Shutdown the thread pool
 		m_worker.Shutdown();
 	}
 
 public:
+	// onUnregister - called when a server port dies
 	void onUnregister(BSTR name);
 
+	// onSendMessage - called by a server port when a client's message is received
+	// NOTE: failes with E_UNEXPECTED, if "dest" is not NULL is not found.
 	HRESULT onSendMessage(BSTR name, BSTR dest, BSTR msg);
+
+	//
+	// IChatServer interface
+	//
 
 	STDMETHOD(registerClient)(BSTR name, IChatClient* pClient, IChatServerPort** ppPort);
 
 private:
+	// LogItem - an item of the message log
 	struct LogItem {
 		// TODO: switch those to _bstr_t to optimize everything
 		CComBSTR		src;
@@ -76,12 +86,12 @@ private:
 
 	typedef CComPtr<IChatClient>	ClientPtr;
 
-	// leave CComBSTR here, because CAtlMap knows how to hash it
-	CAtlMap<CComBSTR, ClientPtr>	m_clients;
+	// NOTE: leave CComBSTR here, because CAtlMap knows how to hash it
+	CAtlMap<CComBSTR, ClientPtr>	m_clients;		// client map
 
-	CAtlList<LogItem>				m_log;
+	CAtlList<LogItem>				m_log;			// message log
 
-	CThreadPool<Worker>				m_worker;
+	CThreadPool<Worker>				m_worker;		// thread pool
 
 };
 

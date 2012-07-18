@@ -7,12 +7,19 @@
 import "oaidl.idl";
 import "ocidl.idl";
 
+//
+// struct ChatMessage - incapsulates a message
+//
+
 typedef struct {
 	[ref]		BSTR	src;
 	[unique]	BSTR	dst;		// may be NULL in case of a broadcast
 	[ref]		BSTR	msg;
 } ChatMessage;
 
+//
+// IChatClient - client notification interface
+//
 [
 	object,
 	uuid(86BC549D-65A1-465C-9D36-4A5884757DC1),
@@ -25,6 +32,9 @@ interface IChatClient : IUnknown {
 	HRESULT notifyMessage([in,ref] ChatMessage* msg);
 };
 
+//
+// IChatServerPort - chat server port
+//
 [
 	object,
 	uuid(F0A1DEEE-57D5-49DB-94F3-1BC126CB0B90),
@@ -36,8 +46,9 @@ interface IChatServerPort : IUnknown {
 		[in, ref]		BSTR msg);
 };
 
-
-
+//
+// IChatServer - chat server interface
+//
 [
 	object,
 	uuid(DBAFF0AF-038D-4924-A4DA-EF086EF356F3),
@@ -50,6 +61,9 @@ interface IChatServer : IUnknown {
 		[out,retval] IChatServerPort** ppPort);
 };
 
+//
+// library stuff
+//
 
 [
 	uuid(6963B0F4-35B0-424E-B40F-97011A6C8037),

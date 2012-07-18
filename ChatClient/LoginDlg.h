@@ -7,6 +7,10 @@
 
 #include "utils.h"
 
+//
+// CLoginDlg -- the dialog that is used to login the user.
+//
+
 class CLoginDlg :
 	public CDialogImpl<CLoginDlg>,
 	public CWinDataExchange<CLoginDlg>
@@ -30,6 +34,10 @@ public:
 	BEGIN_DDX_MAP(CLoginDlg)
 		DDX_TEXT(IDC_LOGIN, m_login)
 	END_DDX_MAP()
+
+	//
+	// The only ctor cofigures refs to a bunch of CComPtr objects.
+	//
 
 	CLoginDlg(
 		CComPtr<IChatClient>&		m_client,
@@ -59,27 +67,26 @@ public:
 	{
 		DoDataExchange(TRUE);		// fetch login
 
-		//err(L"Login: \"%s\"", BSTR2TSTR(m_login));
-
-		COCALL(m_server->registerClient(m_login, m_client, &m_port), L"registering") {
+		COCALL(m_server->registerClient(m_login, m_client, &m_port), _T("registering")) {
 			EndDialog(IDABORT);
 			return 0;
 		}
 
 		if(m_port == NULL) {
 			::MessageBox(this->m_hWnd,
-				L"A user with the same name already registered",
-				L"Login error", 0);
+				_T("A user with the same name already registered"),
+				_T("Login error"), 0);
 			return 0;
 		}
 
+		// Close the dialog on successful login.
 		EndDialog(IDOK);
 		return 0;
 	}
 
 	LRESULT OnExit(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 	{
-		EndDialog(wID);
+		EndDialog(wID);		// That usually sends IDCANCEL
 		return 0;
 	}
 

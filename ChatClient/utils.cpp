@@ -1,21 +1,27 @@
 #include "utils.h"
 
 
+//
+// COCALL implementation
+//
+//  Diaplays an error if the HRESULT of the call is somewhat invalid
+//
+
 bool CoCallImplementation(HRESULT hr, LPCTSTR msg) {
 	if(FAILED(hr)) {
 		TCHAR		buf[200];
 
-		wsprintf(buf, L"%s: %08X", msg, hr);
+		wsprintf(buf, _T("%s: %08X"), msg, hr);
 
-		::MessageBox(0, buf, L"Com Error", 0);
+		::MessageBox(0, buf, _T("Com Error"), 0);
 
 		return true;
 	}else if(hr != S_OK) {
 		TCHAR		buf[200];
 
-		wsprintf(buf, L"%s: %08X", msg, hr);
+		wsprintf(buf, _T("%s: %08X"), msg, hr);
 
-		::MessageBox(0, buf, L"Com Warning", 0);
+		::MessageBox(0, buf, _T("Com Warning"), 0);
 
 		return true;
 	}
@@ -25,7 +31,9 @@ bool CoCallImplementation(HRESULT hr, LPCTSTR msg) {
 
 
 
-
+//
+// err -- vararg message notification
+//
 
 void err(LPCTSTR msg, ... ) {
 	TCHAR		buf[200];
@@ -38,5 +46,5 @@ void err(LPCTSTR msg, ... ) {
 
 	va_end(list);
 
-	::MessageBox(0, buf, L"Chat Client", 0);
+	::MessageBox(0, buf, _T("Chat Client"), 0);
 }

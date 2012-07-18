@@ -7,7 +7,8 @@
 
 class AbsNotify {
 protected:
-	// note those SHOULD be objects (not refs)
+	// NOTE: those SHOULD be objects (not refs) to make sure they are not released
+	// somewhere else.
 	CComPtr<IChatClient>	pCl;
 	CComBSTR				name;
 
@@ -20,7 +21,7 @@ protected:
 public:
 
 	//
-	// NOTE: all notification object free themselves upon Invoke
+	// NOTE: all notification objects free themselves upon Invoke
 	//
 
 	virtual void Invoke() = 0;

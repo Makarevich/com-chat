@@ -13,8 +13,12 @@ using namespace ATL;
 #include "utils.h"
 
 
-
-// CChatServer
+//
+// CChatServerPort
+//
+//  Used for all the stuff the client would do after it has registered on the server.
+//  Exposes IChatServerPort.
+//
 
 class ATL_NO_VTABLE CChatServerPort :
 	public CComObjectRootEx<CComMultiThreadModel>,
@@ -33,6 +37,7 @@ END_COM_MAP()
 
 	DECLARE_PROTECT_FINAL_CONSTRUCT()
 
+	// Setup - configures the port
 	void Setup(const CComBSTR& login, CChatServer* serv) {
 		m_login = login;
 		m_serv = serv;
@@ -45,12 +50,13 @@ END_COM_MAP()
 
 	void FinalRelease()
 	{
-		//err(L"Port dying");
+		// announce our death to the server
 		m_serv->onUnregister(m_login);
 	}
 
 public:
 
+	// IChatServerPort interface
 	STDMETHOD(sendMessage)(BSTR dest, BSTR msg) {
 		return m_serv->onSendMessage(m_login, dest, msg);
 	}
