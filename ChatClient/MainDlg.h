@@ -67,6 +67,7 @@ public:
 		m_msg.SetFocus();
 
 		m_peers.AddString(_T("--"));	// That line would indicate "send to all"
+		m_peers.SetCurSel(0);
 
 		// tell the client object we're ready
 		m_chat_client.Configure(this);
@@ -76,18 +77,30 @@ public:
 
 	LRESULT OnSend(WORD /*wNotifyCode*/, WORD wID, HWND /*hWndCtl*/, BOOL& /*bHandled*/)
 	{
+		// message buffer
 		const int	buf_size = 256;
-
 		TCHAR		buf[buf_size + 1];
 
-		*buf = 0;
+		CComBSTR	dest;
 
-		int cnt = m_msg.GetLine(0, buf, buf_size);
+		{
+			// fetch message
+			*buf = 0;
+			int cnt = m_msg.GetLine(0, buf, buf_size);
+			buf[cnt] = 0;
+		}
 
-		buf[cnt] = 0;
+		{
+			// get message destination
+			const int dest_id = m_peers.GetCurSel();
+
+			if(dest_id != 0) {
+				m_peers.GetLBTextBSTR(dest_id, dest.m_str);
+			}
+		}
 
 		// TODO: here a COM CALL is made by the GUI thread, which is BAAAD
-		COCALL(m_server_port->sendMessage(NULL, CComBSTR(buf)), _T("sending message")) {
+		COCALL(m_server_port->sendMessage(dest, CComBSTR(buf)), _T("sending message")) {
 		}
 
 		m_msg.SetWindowText(_T(""));
